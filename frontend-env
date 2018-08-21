@@ -1,0 +1,7 @@
+REACT_APP_CAPTCHA_KEY=key
+REACT_APP_WEBSOCKET=ws://backend:8001/
+REACT_APP_BOKEH=http://backend/dashboard/
+REACT_APP_API=http://backend/
+REACT_APP_OFFLINE=true
+REACT_APP_VERSION=xxx
+REACT_APP_SOUND=true

@@ -1,0 +1,61 @@
+version: '2'
+services:
+  frontend:
+    image: felipelm/qlf:latest_frontend
+    environment:
+      - QLF_UI_PORT=3000
+    entrypoint: sh entrypoint.sh
+    working_dir: /home/node
+    volumes:
+      - ./frontend-env:/home/node/.env
+    ports:
+      - 3000:3000
+    cap_drop:
+      - ALL
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=qlfuser
+      - POSTGRES_USER=userqlf
+      - POSTGRES_DB=dbqlf
+    ports:
+      - "5433:5432"
+  backend:
+    image: felipelm/backend_qlf:offline
+    environment:
+      - QLF_API_URL=http://backend:8001/dashboard/api
+      - QLF_BASE_URL=http://backend:8001
+      - QLF_HOSTNAME=*
+      - QLF_PORT=8001
+      - EMAIL_USE_TLS = False
+      - EMAIL_HOST=localhost
+      - EMAIL_PORT=25
+      - EMAIL_HELPDESK=LIneA Science Server <helpdesk@linea.gov.br>
+      - UPDATE_DEPENDENCIES=False # run conda and pip install when starting container
+      - RUN_DB_MIGRATIONS=True
+      - POSTGRES_PASSWORD=qlfuser
+      - POSTGRES_USER=userqlf
+      - POSTGRES_DB=dbqlf
+      - POSTGRES_PORT=
+      - POSTGRES_OPTIONS=
+      - DB_NAME=db
+    working_dir: /app/
+    volumes:
+      - ./logs/:/app/logs/
+    command: ./run.sh # script that runs on docker-compose up
+    ports:
+      - "8001:8001" # Django
+    depends_on:
+      - db
+  web:
+    image: nginx:latest
+    ports:
+      - "80:8080"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    #  user: "501:20"
+    cap_drop:
+      - ALL
+    depends_on:
+      - frontend
+      - backend
